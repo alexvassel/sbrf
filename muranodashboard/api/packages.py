@@ -57,7 +57,7 @@ def package_list(request, marker=None, filters=None, paginate=False,
 def app_by_fqn(request, fqn):
     apps = api.muranoclient(request).packages.filter(fqn=fqn)
     try:
-        return apps.next()
+        return iter(apps).next()
     except StopIteration:
         return None
 
