@@ -213,6 +213,7 @@ class EnvironmentsTable(tables.DataTable):
     class Meta:
         name = 'murano'
         verbose_name = _('Environments')
+        template = 'common/_data_table.html'
         row_class = UpdateEnvironmentRow
         status_columns = ['status']
         table_actions = (CreateEnvironment,)
@@ -254,6 +255,7 @@ class ServicesTable(tables.DataTable):
     class Meta:
         name = 'services'
         verbose_name = _('Components')
+        template = 'common/_data_table.html'
         status_columns = ['status']
         row_class = UpdateServiceRow
         table_actions = (AddApplication, DeployThisEnvironment)
@@ -290,6 +292,7 @@ class DeploymentsTable(tables.DataTable):
     class Meta:
         name = 'deployments'
         verbose_name = _('Deployments')
+        template = 'common/_data_table.html'
         row_actions = (ShowDeploymentDetails,)
 
 
@@ -306,3 +309,4 @@ class EnvConfigTable(tables.DataTable):
     class Meta:
         name = 'environment_configuration'
         verbose_name = _('Deployed Components')
+        template = 'common/_data_table.html'
