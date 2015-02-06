@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import logging
+
 from django.core.urlresolvers import reverse
 from django import shortcuts
 from django.utils.translation import ugettext_lazy as _
@@ -22,6 +24,8 @@ from horizon import tables
 
 from muranodashboard.environments import api
 from muranodashboard.environments import consts
+
+LOG = logging.getLogger(__name__)
 
 
 def _get_environment_status_and_version(request, table):
@@ -53,20 +57,29 @@ class CreateEnvironment(tables.LinkAction):
     name = 'CreateEnvironment'
     verbose_name = _('Create Environment')
     url = 'horizon:murano:environments:create_environment'
-    classes = ('btn-launch', 'ajax-modal')
+    classes = ('btn-launch', 'add_env')
+    redirect_url = "horizon:project:murano:environments"
     icon = 'plus'
 
     def allowed(self, request, datum):
         return True
 
     def action(self, request, environment):
-        api.environment_create(request, environment)
+        try:
+            api.environment_create(request, environment)
+        except Exception as e:
+            msg = (_('Unable to create environment {0}'
+                     ' due to: {1}').format(environment, e))
+            LOG.info(msg)
+            redirect = reverse(self.redirect_url)
+            exceptions.handle(request, msg, redirect=redirect)
 
 
 class DeleteEnvironment(tables.DeleteAction):
     data_type_singular = _('Environment')
     data_type_plural = _('Environments')
     action_past = _('Start Deleting')
+    redirect_url = "horizon:project:murano:environments"
 
     def allowed(self, request, environment):
         if environment:
@@ -75,7 +88,14 @@ class DeleteEnvironment(tables.DeleteAction):
         return True
 
     def action(self, request, environment_id):
-        api.environment_delete(request, environment_id)
+        try:
+            api.environment_delete(request, environment_id)
+        except Exception as e:
+            msg = (_('Unable to delete environment {0}'
+                     ' due to: {1}').format(environment_id, e))
+            LOG.info(msg)
+            redirect = reverse(self.redirect_url)
+            exceptions.handle(request, msg, redirect=redirect)
 
 
 class EditEnvironment(tables.LinkAction):
@@ -213,9 +233,10 @@ class EnvironmentsTable(tables.DataTable):
     class Meta:
         name = 'murano'
         verbose_name = _('Environments')
-        template = 'common/_data_table.html'
+        template = 'environments/_data_table.html'
         row_class = UpdateEnvironmentRow
         status_columns = ['status']
+        no_data_message = _('NO ENVIRONMENTS')
         table_actions = (CreateEnvironment,)
         row_actions = (ShowEnvironmentServices, DeployEnvironment,
                        EditEnvironment, DeleteEnvironment)
