@@ -20,18 +20,6 @@ h3.heading_switcher {
   font-size: 18px;
 }
 
-.add_env {
-  margin-left: auto;
-  margin-right: auto;
-}
-.no_envs {
-  color: slategray;
-}
-
-.link.reference {
-  stroke-dasharray: 5,5;
-}
-
 h3.heading_switcher a.btn {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
@@ -177,6 +165,7 @@ h3.link .caret {
 }
 .app-icon img {
     max-height:70px;
+    width: 100%;
     margin: 0;
 }
 
@@ -279,10 +268,9 @@ h3.link .caret {
   }
 }
 
-.modal-header.ui-draggable-handle {
-  padding: 0 15px;
-}
-
-.modal-header img {
-  margin-top: -7px;
+.selected-field {
+  color: #428BCA;
+  margin-left: -12px;
+  font-weight: bold;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
