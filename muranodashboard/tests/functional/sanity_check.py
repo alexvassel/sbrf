@@ -40,7 +40,7 @@ class TestSuiteSmoke(base.UITestCase):
         self.check_panel_is_present('Package Definitions')
 
 
-class TestSuiteEnvironment(base.EnvironmentTestCase):
+class TestSuiteEnvironment(base.ApplicationTestCase):
     def test_create_delete_environment(self):
         """Test check ability to create and delete environment
 
@@ -71,6 +71,24 @@ class TestSuiteEnvironment(base.EnvironmentTestCase):
         self.edit_environment(old_name='test_edit_env', new_name='edited_env')
         self.check_element_on_page(by.By.LINK_TEXT, 'edited_env')
         self.check_element_not_on_page(by.By.LINK_TEXT, 'test_edit_env')
+
+    def test_create_env_from_the_catalog_page(self):
+        """Test create environment from the catalog page
+
+        Scenario:
+           1. Go the the Applications page
+           2. Press 'Create Env'
+           3. Make sure that it's possible to chose just created environment
+        """
+        self.go_to_submenu('Applications')
+        self.driver.find_elements_by_xpath(
+            "//a[contains(text(), 'Create Env')]")[0].click()
+        self.fill_field(by.By.ID, 'id_name', 'TestEnv')
+        self.driver.find_element_by_xpath(c.InputSubmit).click()
+        self.wait_for_alert_message()
+        self.check_element_on_page(
+            by.By.XPATH,
+            "//div[@id='environment_switcher']/a[contains(text(), 'TestEnv')]")
 
 
 class TestSuiteImage(base.ImageTestCase):
@@ -464,8 +482,7 @@ class TestSuiteApplications(base.ApplicationTestCase):
                                    c.Status.format('Ready to deploy'))
         self.check_element_on_page(by.By.XPATH, c.CellStatus.format('up'))
 
-        self.driver.find_element_by_css_selector(
-            '#services__action_deploy_env').click()
+        self.driver.find_element_by_id('services__action_deploy_env').click()
         self.check_element_on_page(by.By.XPATH,
                                    c.Status.format('Deploying'))
         self.check_element_on_page(by.By.XPATH, c.CellStatus.format('unknown'))
@@ -487,37 +504,33 @@ class TestSuiteApplications(base.ApplicationTestCase):
         self.check_element_on_page(
             by.By.XPATH, "//dd[contains(text(), {0})]".format(app_name))
 
-    def test_check_actions_tab(self):
-        """Test check that action tab in deployed application is available
-        and actions are display in the corresponding tab
+    def test_ensure_actions(self):
+        """Checks that action is available for deployed application
 
         Scenario:
             1. Navigate Applications and click MockApp 'Quick Deploy'
             2. Click deploy
             3. Wait 'Ready' status
             4. Click on application
-            5. Check that 'Actions' tab is present
-            6. Click on 'Actions' tab
-            7. Check that application's actions are present
+            5. Check that defined action name is in the list of app 'actions'
+
         """
         self.add_app_to_env(self.mockapp_id)
-
-        self.driver.find_element_by_css_selector(
-            '#services__action_deploy_env').click()
+        self.driver.find_element_by_id('services__action_deploy_env').click()
 
         self.check_element_on_page(by.By.XPATH,
                                    c.Status.format('Ready'),
                                    sec=90)
-
-        self.driver.find_element_by_link_text('TestApp').click()
-        self.check_element_on_page(by.By.LINK_TEXT, 'Actions')
-        self.driver.find_element_by_link_text('Actions').click()
-
-        self.check_element_on_page(by.By.LINK_TEXT, 'deploy')
+        el = self.wait_element_is_clickable(by.By.XPATH,
+                                            c.More.format('services', ''))
+        el.click()
+        self.driver.find_element_by_xpath(c.Action).click()
+        self.driver.find_element_by_css_selector('.modal-close button').click()
+        self.check_element_on_page(by.By.XPATH,
+                                   "//*[contains(text(), 'Completed')]")
 
     def test_check_info_about_app(self):
-        """Test checks that information about app is available and truly.
-
+        """Test checks that information about app is available and tr
         Scenario:
             1. Navigate to 'Application Catalog > Applications' panel
             2. Choose some application and click on 'More info'
@@ -530,7 +543,57 @@ class TestSuiteApplications(base.ApplicationTestCase):
                          self.driver.find_element_by_xpath(
                              "//div[@class='app-description']").text)
         self.driver.find_element_by_link_text('Requirements').click()
+        self.driver.find_element_by_class_name('app_requirements')
         self.driver.find_element_by_link_text('License').click()
+        self.driver.find_element_by_class_name('app_license')
+
+    def test_check_topology_page(self):
+        """Test checks that topology tab is available
+        and topology page displays correctly
+
+        Scenario:
+            1. Navigate Applications and click MockApp 'Quick Deploy'
+            2. Click deploy
+            3. Wait 'Ready' status
+            4. Click on 'Topology' tab
+            5. Check that status is 'Waiting for deployment' is displayed
+            6. Check that app logo is present on page
+        """
+        self.add_app_to_env(self.mockapp_id)
+        self.driver.find_element_by_link_text('Topology').click()
+
+        self.assertEqual(
+            'Status: Waiting for deployment',
+            self.driver.find_element_by_css_selector('#stack_box > p').text)
+
+        self.check_element_on_page(by.By.TAG_NAME, 'image')
+
+    def test_check_deployment_history(self):
+        """Test checks that deployment history tab is available
+        and deployment logs are present and correctly
+
+        Scenario:
+            1. Navigate Applications and click MockApp 'Quick Deploy'
+            2. Click deploy
+            3. Wait 'Ready' status
+            4. Click on 'Deployment History' tab
+            5. Click 'Show Details' button
+            6. Click 'Logs' button
+            7. Check that app deployment message is present in logs
+        """
+        self.add_app_to_env(self.mockapp_id)
+        self.driver.find_element_by_id('services__action_deploy_env').click()
+
+        self.check_element_on_page(by.By.XPATH,
+                                   c.Status.format('Ready'),
+                                   sec=90)
+
+        self.driver.find_element_by_link_text('Deployment History').click()
+        self.driver.find_element_by_link_text('Show Details').click()
+        self.driver.find_element_by_link_text('Logs').click()
+
+        self.assertIn('Follow the white rabbit',
+                      self.driver.find_element_by_class_name('logs').text)
 
 
 class TestSuitePackages(base.PackageTestCase):
@@ -668,6 +731,10 @@ class TestSuitePackages(base.PackageTestCase):
                              c.MockAppDescr).text)
 
     def test_upload_package(self):
+        """Test package uploading via Package Definitions view.
+           Skip category selection step.
+
+        """
         self.navigate_to('Manage')
         self.go_to_submenu('Package Definitions')
 
@@ -679,7 +746,6 @@ class TestSuitePackages(base.PackageTestCase):
 
         # No application data modification is needed
         self.driver.find_element_by_xpath(c.InputSubmit).click()
-        self.driver.find_element_by_css_selector(c.DatabaseCategory).click()
         self.driver.find_element_by_xpath(c.InputSubmit).click()
 
         self.wait_for_alert_message()
