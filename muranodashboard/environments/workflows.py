@@ -26,8 +26,8 @@ from muranodashboard.environments import api
 
 
 LOG = logging.getLogger(__name__)
-HELP_TEXT = _("Environment names must contain only alphanumeric or '_-.'"
-              " characters and must start with alpha")
+HELP_TEXT = _("Environment names must contain only alphanumeric or '-'"
+              " and must start with alpha")
 
 
 class SelectProjectUserAction(workflows.Action):
