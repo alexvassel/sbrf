@@ -26,7 +26,9 @@ class MarkImage(tables.LinkAction):
     icon = "plus"
 
     def allowed(self, request, image):
-        return True
+        if request.user.has_perm('openstack.roles.admin'):
+            return True
+        return False
 
 
 class RemoveImageMetadata(tables.DeleteAction):
@@ -40,6 +42,11 @@ class RemoveImageMetadata(tables.DeleteAction):
         except Exception:
             exceptions.handle(request, _('Unable to remove metadata'),
                               redirect='horizon:murano:images:index')
+
+    def allowed(self, request, image):
+        if request.user.has_perm('openstack.roles.admin'):
+            return True
+        return False
 
 
 class MarkedImagesTable(tables.DataTable):
