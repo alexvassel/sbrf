@@ -452,3 +452,38 @@ SECURITY_GROUP_RULES = {
 # Overrides the default dashboard name (Murano) that is displayed
 # in the main accordion navigation
 # MURANO_DASHBOARD_NAME = "Murano"
+
+MURANO_REPO_URL = 'http://127.0.0.1/'
+
+# Deprecation Notice:
+#
+# The setting FLAVOR_EXTRA_KEYS has been deprecated.
+# Please load extra spec metadata into the Glance Metadata Definition Catalog.
+#
+# The sample quota definitions can be found in:
+# <glance_source>/etc/metadefs/compute-quota.json
+#
+# The metadata definition catalog supports CLI and API:
+#  $glance --os-image-api-version 2 help md-namespace-import
+#  $glance-manage db_load_metadefs <directory_with_definition_files>
+#
+# See Metadata Definitions on: http://docs.openstack.org/developer/glance/
+
+# Indicate to the Sahara data processing service whether or not
+# automatic floating IP allocation is in effect.  If it is not
+# in effect, the user will be prompted to choose a floating IP
+# pool for use in their cluster.  False by default.  You would want
+# to set this to True if you were running Nova Networking with
+# auto_assign_floating_ip = True.
+#SAHARA_AUTO_IP_ALLOCATION_ENABLED = False
+
+# The hash algorithm to use for authentication tokens. This must
+# match the hash algorithm that the identity server and the
+# auth_token middleware are using. Allowed values are the
+# algorithms supported by Python's hashlib library.
+#OPENSTACK_TOKEN_HASH_ALGORITHM = 'md5'
+
+# Overrides the default dashboard name (Murano) that is displayed
+# in the main accordion navigation
+# MURANO_DASHBOARD_NAME = "Murano"
+>>>>>>> ea13ae8... Support importing packages from murano repository
