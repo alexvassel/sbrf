@@ -274,7 +274,6 @@ class ImportPackageWizard(views.ModalFormMixin,
             step_data['dependencies'] = []
             for dep_name, dep_package in reqs.iteritems():
                 try:
-
                     imgs = muranoclient_utils.ensure_images(
                         glance_client=glance_client,
                         image_specs=dep_package.images(),
@@ -287,7 +286,7 @@ class ImportPackageWizard(views.ModalFormMixin,
                         LOG.info(msg)
                 except Exception as e:
                     msg = _("Error {0} occurred while installing "
-                            "images for {1}").format(e, name)
+                            "images for {1}").format(e, dep_name)
                     messages.error(self.request, msg)
                     LOG.exception(msg)
                 try:
@@ -308,6 +307,25 @@ class ImportPackageWizard(views.ModalFormMixin,
                     LOG.exception(msg)
                     continue
 
+            # install main package images
+            try:
+                imgs = muranoclient_utils.ensure_images(
+                    glance_client=glance_client,
+                    image_specs=original_package.images(),
+                    base_url=base_url)
+                for img in imgs:
+                    msg = _("Added {0}, {1} image to glance").format(
+                        img['name'], img['id'],
+                    )
+                    messages.success(self.request, msg)
+                    LOG.info(msg)
+            except Exception as e:
+                msg = _("Error {0} occurred while installing "
+                        "images for {1}").format(e, name)
+                messages.error(self.request, msg)
+                LOG.exception(msg)
+
+            # install main package images
             try:
                 files = {name: original_package.file()}
                 package = api.muranoclient(self.request).packages.create(
