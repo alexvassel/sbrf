@@ -106,7 +106,7 @@ class CreateEnvironment(workflows.Workflow):
             context['environment_id'] = environment.id
             return True
         except exc.HTTPConflict:
-            msg = "Environment with specified name is already exist"
+            msg = "Environment with specified name already exists"
             LOG.error("Environment with specified name is already exist")
             exceptions.handle(request, msg)
             return False
