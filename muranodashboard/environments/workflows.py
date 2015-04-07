@@ -22,6 +22,7 @@ from horizon import exceptions
 from horizon import forms
 from horizon import workflows
 
+from muranoclient.common import exceptions as exc
 from muranodashboard.environments import api
 
 
@@ -89,7 +90,11 @@ class CreateEnvironment(workflows.Workflow):
 
     def get_success_url(self):
         env_id = self.context.get('environment_id')
-        return reverse("horizon:murano:environments:services", args=[env_id])
+        if env_id:
+            return reverse("horizon:murano:environments:services",
+                           args=[env_id])
+        else:
+            return reverse("horizon:murano:environments:index")
 
     def format_status_message(self, message):
         name = self.context.get('name', 'noname')
@@ -100,11 +105,15 @@ class CreateEnvironment(workflows.Workflow):
             environment = api.environment_create(request, context)
             context['environment_id'] = environment.id
             return True
-
+        except exc.HTTPConflict:
+            msg = "Environment with specified name is already exist"
+            LOG.error("Environment with specified name is already exist")
+            exceptions.handle(request, msg)
+            return False
         except Exception:
             name = self.context.get('name', 'noname')
             LOG.error("Unable to create environment {0}".format(name))
-            exceptions.handle(request)
+            exceptions.handle(request, ignore=True)
             return False
 
 
