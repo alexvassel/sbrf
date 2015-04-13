@@ -55,12 +55,12 @@ class AppRequirementsTab(tabs.Tab):
     def _get_requirements(self):
         forms = services.get_app_forms(self.request, {'app_id': self.app.id})
         self.app.requirements = []
-        for step in forms:
+        for step_name, step in forms:
             for key in step.base_fields:
                 # Check for instance size requirements in the UI yaml file.
                 if key == 'flavor':
-                    if hasattr(step.base_fields[key], 'requirements'):
-                        reqs = step.base_fields[key].requirements
+                    reqs = getattr(step.base_fields[key], 'requirements', '')
+                    if reqs:
                         # Make the requirement values screen-printable.
                         self.app.requirements.append('Instance flavor:')
                         requirements = []
@@ -98,7 +98,7 @@ class AppLicenseAgreementTab(tabs.Tab):
     def _get_license(self):
         forms = services.get_app_forms(self.request, {'app_id': self.app.id})
         self.app.license = ''
-        for step in forms:
+        for step_name, step in forms:
             for key in step.base_fields.keys():
                 # Check for a license in the UI yaml file.
                 if key == 'license':
