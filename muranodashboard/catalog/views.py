@@ -46,6 +46,7 @@ from muranodashboard.dynamic_ui import helpers
 from muranodashboard.dynamic_ui import services
 from muranodashboard.environments import api as env_api
 from muranodashboard.environments import consts
+from muranodashboard.packages import consts as pkg_consts
 
 
 LOG = logging.getLogger(__name__)
@@ -535,7 +536,8 @@ class IndexView(list_view.ListView):
             context['search'] = search
 
         context.update(get_environments_context(self.request))
-
+        context['repo_url'] = pkg_consts.MURANO_REPO_URL
+        context['pkg_def_url'] = reverse('horizon:murano:packages:index')
         return context
 
 
