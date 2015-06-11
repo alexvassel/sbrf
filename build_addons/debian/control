@@ -1,0 +1,29 @@
+Source: murano-dashboard
+Section: Python
+Priority: extra
+Maintainer: root <ashestakov@mirantis.com>
+Build-Depends: debhelper (>= 8.0.0),
+ python-setuptools,
+ python-pbr (>= 0.6), python-pbr (<< 1.0)
+Standards-Version: 3.9.2
+Homepage: mirantis.com
+Vcs-Browser: https://gerrit.mirantis.com/gitweb?p=murano%2Fmurano-dashboard.git
+
+Package: murano-dashboard
+Architecture: all
+Depends: ${misc:Depends}
+ python,
+ python-setuptools,
+ python-d2to1 (>= 0.2), python-d2to1 (<< 0.3),
+ openstack-dashboard,
+# Murano direct dependencies:
+ python-anyjson (>= 0.3.3),
+ python-iso8601 (>= 0.1.9),
+ python-pbr (>= 0.6), python-pbr (<< 0.7) | python-pbr (>> 0.7), python-pbr (<< 1.0),
+ python-yaml (>= 3.1.0),
+ python-six (>= 1.7.0),
+# Incompatible with global requirements:
+ python-django-floppyforms (>= 1.1),
+ python-muranoclient (>= 0.5.5),
+ python-yaql (>= 0.2.3), python-yaql (<< 0.3)
+Description: murano-dashboard
